@@ -35,6 +35,12 @@ public class ReservationController {
     }
 
     @ResponseBody
+    @PostMapping("/init")
+    public List<SavedReservation> initData() {
+        return reservationService.findAll();
+    }
+
+    @ResponseBody
     @ExceptionHandler(RoomNotAvailableException.class)
     public String handleRoomNotAvailableException(RoomNotAvailableException e) {
         return e.getMessage();

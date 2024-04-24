@@ -233,7 +233,28 @@ function checkAttendee() {
         locale: 'ko' // 한국어 설정
       });
 
-      calendar.render();
+      /*
+        init data
+      */
+      $.ajax({
+            type: "POST",
+            url: "/init",
+            success: function(res) {
+
+                let event = {
+                    title: res.title,
+                    start: res.startTime,
+                    end: res.endTime
+                };
+
+                calendar.addEvent(event)
+                calendar.render();
+
+            },
+            error: function() {
+                toastr.error("오류가 발생하여 저장된 데이터를 불러올 수 없습니다.");
+            }
+        });
 
       /*
         예약데이터 저장하기

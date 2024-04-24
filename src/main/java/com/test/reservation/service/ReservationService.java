@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -43,8 +44,17 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public List<Reservation> findAll() {
-        return reservationRepository.findAll();
+    public List<SavedReservation> findAll() {
+        List<Reservation> list = reservationRepository.findAll();
+        List<SavedReservation> data = new ArrayList<>();
+        for (Reservation reservation : list) {
+            SavedReservation savedReservation = new SavedReservation();
+            savedReservation.setTitle(reservation.getTitle());
+            savedReservation.setStartTime(reservation.getResStart().toString());
+            savedReservation.setEndTime(reservation.getResEnd().toString());
+            data.add(savedReservation);
+        }
+        return data;
     }
 
     private SavedReservation findLast(Reservation reservation) {
