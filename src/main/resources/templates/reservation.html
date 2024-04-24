@@ -6,13 +6,13 @@
     <meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
     <!-- fullcalendar -->
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
-    <!-- jquery CDN -->
+    <!-- jquery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <!-- fullcalendar 언어 CDN -->
+    <!-- fullcalendar 언어 -->
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/locales-all.min.js'></script>
-    <!-- bootstrap cdn -->
+    <!-- bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <!-- toastr 추가 -->
+    <!-- toastr -->
     <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.css"
           integrity="sha512-3pIirOrwegjM6erE5gPSwkUzO+3cTjpnV9lexlNZqvupR64iZBnOOTiiLPb9M36zpMScbmUNIcHUqKD47M719g=="
@@ -76,6 +76,10 @@
         .reservation-table {
             flex-basis: 30%; /* 너비 조정 */
         }
+        #price {
+            border: 0px;
+            padding-left: 10px;
+        }
     </style>
 
     <title>Y Room 예약하기</title>
@@ -93,11 +97,13 @@
             <form method="post" action="/book" th:object="${bookingForm}">
                 <div>회의명</div>
                 <div>
-                    <input type="text" th:field="*{title}" placeholder="회의 제목을 입력하세요" class="form-control">
+                    <input type="text" th:field="*{title}" placeholder="회의 제목을 입력하세요"
+                           class="form-control" minlength="1" maxlength="30">
                 </div>
                 <div>예약자명</div>
                 <div>
-                    <input type="text" th:field="*{resName}" placeholder="예약자 성함을 입력하세요" class="form-control">
+                    <input type="text" th:field="*{resName}" placeholder="예약자 성함을 입력하세요"
+                           class="form-control" minlength="0" maxlength="10">
                 </div>
                 <div>인원수</div>
                 <div>
@@ -109,21 +115,20 @@
                     <input type="date" th:field="*{resDate}" class="form-control" min="">
                 </div>
                 <div>
-                    <input type="checkbox" id="isAllDay" >
+                    <input type="checkbox" id="isAllDay">
                     <label for="isAllDay">하루종일</label>
                 </div>
-                <div>시작시간</div>
                 <div>
+                    시작시간 &nbsp;&nbsp;
                     <select th:field="*{startTime}">
                         <option th:each="hour : ${#numbers.sequence(9,19)}"
                                 th:value="${hour >= 10 ? hour : '0' + hour} + ':00'"
                                 th:text="${hour >= 10 ? hour : '0' + hour} + ':00'">
                         </option>
-
                     </select>
                 </div>
-                <div>종료시간</div>
                 <div>
+                    종료시간 &nbsp;&nbsp;
                     <select th:field="*{endTime}">
                         <option th:each="hour : ${#numbers.sequence(10,20)}"
                                 th:value="${hour >= 10 ? hour : '0' + hour} + ':00'"
@@ -131,13 +136,17 @@
                         </option>
                     </select>
                 </div>
-                <div>결제 비용</div>
-                <div>비용 출력</div>
-                <button class="btn btn-primary" type="button" id="saveBtn">예약하기</button>
+                <div>
+                    <button class="btn btn-outline-secondary btn-sm" type="button" id="priceBtn">결제 비용 확인</button>
+                    <input type="text" th:field="*{price}" style="visibility: hidden;" readonly>
+                </div>
+                <div style="text-align: center;">
+                    <button class="btn btn-primary" type="button" id="saveBtn">예약하기</button>
+                </div>
             </form>
         </div>
     </div>
-
+</body>
 <script>
 
 //현재 날짜 가져오기
@@ -146,49 +155,70 @@ var year = today.getFullYear();
 var month = String(today.getMonth() + 1).padStart(2, '0'); // 월은 0부터 시작하므로 +1
 var day = String(today.getDate()).padStart(2, '0'); // 일
 var formattedDate = year + '-' + month + '-' + day;
+var maxDate = (year + 1) + '-' + month + '-' + day;
 
-// input 요소의 min 속성에 현재 날짜 할당
+// input 요소의 min, max 설정
 document.getElementById('resDate').setAttribute('min', formattedDate);
-
-// select 요소 가져오기
-var selectEl = document.getElementById('startTime');
-
-// option들을 반복하면서 현재 시간 이후의 시간만 남기기
-<!--for (var i = 0; i < selectEl.options.length; i++) {-->
-<!--    var option = selectEl.options[i];-->
-<!--    var [optionHour, optionMinute] = option.value.split(':');-->
-
-<!--    // 현재 시간과 option의 시간 비교-->
-<!--    var currentHour = today.getHours();-->
-<!--    var currentMinute = today.getMinutes();-->
-<!--    if (parseInt(optionHour) > currentHour || (parseInt(optionHour) === currentHour && parseInt(optionMinute) > currentMinute)) {-->
-<!--        option.disabled = false; // 현재 시간 이후의 시간은 선택 가능하도록 설정-->
-<!--    } else {-->
-<!--        option.disabled = true; // 현재 시간 이전의 시간은 선택 불가능하도록 설정-->
-<!--    }-->
-<!--}-->
-
-
+document.getElementById('resDate').setAttribute('max', maxDate);
 document.getElementById('startTime').setAttribute('min', formattedDate);
+
+// 인원수 validation
+function checkAttendee() {
+    let val = document.getElementById("attendee").value.trim();
+    if (1 <= val && val <= 30) {
+        return true;
+    } else {
+        return false;
+    }
+}
 
   (function(){
     $(function(){
-      // calendar element 취득
-      var calendarEl = $('#calendar')[0];
-      // full-calendar 생성하기
-      var calendar = new FullCalendar.Calendar(calendarEl, {
+
+        var startTime = $("#startTime");
+        var endTime = $("#endTime");
+
+        //하루종일 버튼 클릭했을 때
+        document.getElementById("isAllDay").addEventListener("input", function() {
+            var isAllDay = $("#isAllDay");
+
+            if (isAllDay.prop("checked")) {
+                console.log("checked")
+                startTime.attr("disabled", true);
+                startTime.val("09:00");
+                endTime.attr("disabled", true);
+                endTime.val("20:00");
+            } else {
+                console.log("unchecked");
+                startTime.attr("disabled", false);
+                endTime.attr("disabled", false);
+                endTime.val("10:00");
+            }
+        });
+
+        // 결제 버튼 클릭했을 때
+        $("#priceBtn").click(function() {
+            const end = endTime.val().split(":");
+            const start = startTime.val().split(":");
+            const hours = end[0] - start[0];
+            let price = $("#price");
+            price.val((hours * 5) + "만원");
+            price.prop("style", "visibility: visible");
+        });
+
+        /*
+            FullCalendar 설정
+        */
+        var calendarEl = $('#calendar')[0];
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+
         height: '700px', // calendar 높이 설정
         expandRows: true, // 화면에 맞게 높이 재설정
         slotMinTime: '09:00', // Day 캘린더에서 시작 시간
         slotMaxTime: '20:00', // Day 캘린더에서 종료 시간
-        customButtons: {
-            addBtn: {
-                text: "add"
-            }
-        },
         // 해더에 표시할 툴바
         headerToolbar: {
-          left: 'prev,next today,addBtn',
+          left: 'prev,next today',
           center: 'title',
           right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
         },
@@ -215,7 +245,21 @@ document.getElementById('startTime').setAttribute('min', formattedDate);
 
       calendar.render();
 
+      /*
+        예약데이터 저장하기
+      */
       $("#saveBtn").click(function(){
+
+          if ($("#title").val().trim() === '') {
+                toastr.error("회의명을 입력해주세요.");
+                return;
+          }
+
+          if (!checkAttendee()) {
+                toastr.error("최대 인원수는 30명입니다.");
+                return;
+          }
+
         const data = {
             resName : $("#resName").val(),
             title : $("#title").val(),
@@ -223,7 +267,7 @@ document.getElementById('startTime').setAttribute('min', formattedDate);
             endTime : $("#endTime").val(),
             attendee : $("#attendee").val(),
             resDate : $("#resDate").val(),
-            price : 0
+            price : $("#price").val()
         };
 
         $.ajax({
@@ -253,7 +297,6 @@ document.getElementById('startTime').setAttribute('min', formattedDate);
 
                     calendar.addEvent(event)
                     calendar.render();
-
                 }
 
             },
@@ -265,5 +308,4 @@ document.getElementById('startTime').setAttribute('min', formattedDate);
     });
   })();
 </script>
-</body>
 </html>
