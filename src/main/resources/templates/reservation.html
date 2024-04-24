@@ -241,15 +241,20 @@ function checkAttendee() {
             url: "/init",
             success: function(res) {
 
-                let event = {
-                    title: res.title,
-                    start: res.startTime,
-                    end: res.endTime
-                };
+                console.log("init completed")
+                console.log("res:", res);
 
-                calendar.addEvent(event)
+                for (var i = 0; i < res.length; i++) {
+                    let event = {
+                        title: res[i].title,
+                        start: res[i].startTime,
+                        end: res[i].endTime
+                    };
+                    calendar.addEvent(event)
+                }
+
                 calendar.render();
-
+                console.log("render completed");
             },
             error: function() {
                 toastr.error("오류가 발생하여 저장된 데이터를 불러올 수 없습니다.");

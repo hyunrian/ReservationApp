@@ -46,6 +46,7 @@ public class ReservationService {
     @Transactional(readOnly = true)
     public List<SavedReservation> findAll() {
         List<Reservation> list = reservationRepository.findAll();
+        log.info("savedList.size()=", list.size());
         List<SavedReservation> data = new ArrayList<>();
         for (Reservation reservation : list) {
             SavedReservation savedReservation = new SavedReservation();
