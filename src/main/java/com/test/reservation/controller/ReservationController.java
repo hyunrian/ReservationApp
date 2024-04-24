@@ -29,7 +29,7 @@ public class ReservationController {
 
     @ResponseBody
     @PostMapping("/book")
-    public SavedReservation book(@Validated @ModelAttribute BookingForm bookingForm) {
+    public SavedReservation book(@ModelAttribute BookingForm bookingForm) {
         log.info("resForm={}", bookingForm);
         return reservationService.save(bookingForm);
     }
