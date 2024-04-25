@@ -7,10 +7,11 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import org.springframework.format.annotation.DateTimeFormat;
-
 import java.time.LocalDate;
 
-@Getter @Setter @ToString
+@Getter
+@Setter
+@ToString
 public class BookingForm {
 
     @Max(10)
@@ -19,8 +20,10 @@ public class BookingForm {
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate resDate = LocalDate.now();
 
+    @NotBlank
     private String startTime;
 
+    @NotBlank
     private String endTime;
 
     @Size(min = 1, max = 30)

@@ -4,13 +4,11 @@ import com.test.reservation.dto.BookingForm;
 import com.test.reservation.utils.TypeConverter;
 import jakarta.persistence.*;
 import lombok.Getter;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
 @Getter
-//@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Reservation {
 
     @Id
@@ -18,18 +16,23 @@ public class Reservation {
     @Column(name = "res_id")
     private Long id;
 
+    @Column(length = 10)
     private String resName;
 
+    @Column(nullable = false)
     private LocalDateTime resStart;
 
+    @Column(nullable = false)
     private LocalDateTime resEnd;
 
+    @Column(length = 2)
     private int attendee;
 
+    @Column(length = 30, nullable = false)
     private String title;
 
+    @Column(length = 2)
     private int price;
-
 
     /**
      * 비즈니스 로직

@@ -1,7 +1,6 @@
 package com.test.reservation.repository;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.test.reservation.domain.QReservation;
 import com.test.reservation.domain.Reservation;
 import jakarta.persistence.EntityManager;
 import org.springframework.stereotype.Repository;
@@ -21,9 +20,6 @@ public class ReservationQueryRepository {
     }
 
     public boolean isRoomAvailable(LocalDateTime startDate, LocalDateTime endDate) {
-
-//        LocalDateTime startDate = LocalDateTime.parse(resStart);
-//        LocalDateTime endDate = LocalDateTime.parse(resEnd);
 
         List<Reservation> overlappingReservations = query
                 .selectFrom(reservation)
